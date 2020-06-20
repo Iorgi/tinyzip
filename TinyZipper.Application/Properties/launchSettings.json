@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TinyZipper.Application": {
+      "commandName": "Project",
+      "commandLineArgs": "Compress C:/tests/enwik8/enwik8 C:/tests/enwik8/enwik8.tinyzip"
+    }
+  }
+}
