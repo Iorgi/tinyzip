@@ -11,23 +11,26 @@ using TinyZipper.Application.Settings;
 
 namespace TinyZipper.Application.Writers
 {
-    public class DestinationFileWriter : IDestinationWriter
+    public class DestinationStreamWriter : IDestinationWriter
     {
-        private readonly IDataFormatService _dataFormatService;
+        private readonly IStreamUtilsService _streamUtilsService;
         private readonly IStatusUpdateService _statusUpdateService;
         private readonly IOutputOverflowControlSettings _outputOverflowControlSettings;
+        private readonly IDestinationStreamService _destinationStreamService;
 
-        public DestinationFileWriter(
-            IDataFormatService dataFormatService,
+        public DestinationStreamWriter(
+            IStreamUtilsService streamUtilsService,
             IStatusUpdateService statusUpdateService,
-            IOutputOverflowControlSettings outputOverflowControlSettings)
+            IOutputOverflowControlSettings outputOverflowControlSettings,
+            IDestinationStreamService destinationStreamService)
         {
-            _dataFormatService = dataFormatService;
+            _streamUtilsService = streamUtilsService;
             _statusUpdateService = statusUpdateService;
             _outputOverflowControlSettings = outputOverflowControlSettings;
+            _destinationStreamService = destinationStreamService;
         }
 
-        public AsyncWriteContext Write(string destinationFileName, CompressionMode compressionMode,
+        public AsyncWriteContext Write(string destinationUri, CompressionMode compressionMode,
             ParallelCompressionContext compressionContext, CancellationToken calculationsFinishedToken)
         {
             var exceptionSource = new CancellationTokenSource();
@@ -35,7 +38,7 @@ namespace TinyZipper.Application.Writers
 
             var thread = new Thread(() =>
             {
-                WriteFile(destinationFileName, compressionMode, compressionContext.ResultsDictionary, tokens, exceptionSource, compressionContext.OutputOverflowEvent);
+                WriteInternal(destinationUri, compressionMode, compressionContext.ResultsDictionary, tokens, exceptionSource, compressionContext.OutputOverflowEvent);
             });
 
             thread.Start();
@@ -43,13 +46,13 @@ namespace TinyZipper.Application.Writers
             return new AsyncWriteContext(thread, exceptionSource);
         }
 
-        private void WriteFile(string fileName, CompressionMode compressionMode, ConcurrentDictionary<int, byte[]> resultPieces, 
+        private void WriteInternal(string destinationUri, CompressionMode compressionMode, ConcurrentDictionary<int, byte[]> resultPieces, 
             CancellationToken[] cancellationTokens, CancellationTokenSource exceptionSrc, ManualResetEventSlim outputOverflowEvent)
         {
             try
             {
                 var index = 1;
-                using (var outputFileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.Write))
+                using (var outputStream = _destinationStreamService.OpenWrite(destinationUri))
                 {
                     while (true)
                     {
@@ -58,9 +61,9 @@ namespace TinyZipper.Application.Writers
 
                         if (resultPieces.TryRemove(index, out var dataBytes))
                         {
-                            WriteMeta(compressionMode, dataBytes, outputFileStream);
+                            WriteMeta(compressionMode, dataBytes, outputStream);
 
-                            outputFileStream.Write(dataBytes);
+                            outputStream.Write(dataBytes);
                             index++;
                             continue;
                         }
@@ -94,7 +97,7 @@ namespace TinyZipper.Application.Writers
         {
             if (compressionMode != CompressionMode.Compress) return;
 
-            var chunkMeta = _dataFormatService.GetChunkMeta(dataBytes);
+            var chunkMeta = _streamUtilsService.GetChunkMeta(dataBytes);
             outputFileStream.Write(chunkMeta);
         }
     }

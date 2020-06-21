@@ -1,5 +1,4 @@
-﻿using System;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using TinyZipper.Application.ClientOptions;
 using TinyZipper.Application.Compressing;
@@ -8,7 +7,6 @@ using TinyZipper.Application.Core.Interfaces;
 using TinyZipper.Application.Readers;
 using TinyZipper.Application.Settings;
 using TinyZipper.Application.StatusUpdaters;
-using TinyZipper.Application.UpstreamFormatting;
 using TinyZipper.Application.Writers;
 
 namespace TinyZipper.Application
@@ -28,13 +26,16 @@ namespace TinyZipper.Application
             containerBuilder.RegisterType<ClientOptionsService>().As<IClientOptionsService>();
             containerBuilder.RegisterType<GzipCompressionService>().As<ICompressionService>();
             containerBuilder.RegisterType<ParallelCompressionOrchestrationService>().As<ICompressionOrchestrationService>();
-            containerBuilder.RegisterType<DestinationFileWriter>().As<IDestinationWriter>();
-            containerBuilder.RegisterType<FileToQueueReader>().As<ISourceReader>();
+            containerBuilder.RegisterType<DestinationStreamWriter>().As<IDestinationWriter>();
+            containerBuilder.RegisterType<StreamToQueueReader>().As<ISourceReader>();
             containerBuilder.RegisterType<ParallelCompressionService>().As<IParallelCompressionService>();
-            containerBuilder.RegisterType<DataFormatService>().As<IDataFormatService>();
             containerBuilder.RegisterType<ConsoleStatusUpdateService>().As<IStatusUpdateService>();
             containerBuilder.RegisterType<OutcomeService>().As<IOutcomeService>();
             containerBuilder.RegisterType<FileService>().As<IFileService>();
+            containerBuilder.RegisterType<FileSourceService>().As<ISourceStreamService>();
+            containerBuilder.RegisterType<StreamUtilsService>().As<IStreamUtilsService>();
+            containerBuilder.RegisterType<FileDestinationService>().As<IDestinationStreamService>();
+            containerBuilder.RegisterType<ThreadService>().As<IThreadService>();
 
             var settings = new DefaultSettings();
             containerBuilder.RegisterInstance(settings).As<IInputOverflowControlSettings>();

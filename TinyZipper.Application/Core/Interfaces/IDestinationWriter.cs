@@ -7,7 +7,7 @@ namespace TinyZipper.Application.Core.Interfaces
 {
     public interface IDestinationWriter
     {
-        AsyncWriteContext Write(string destinationFileName, CompressionMode compressionMode,
+        AsyncWriteContext Write(string destinationUri, CompressionMode compressionMode,
             ParallelCompressionContext compressionContext, CancellationToken calculationsFinishedToken);
     }
 }

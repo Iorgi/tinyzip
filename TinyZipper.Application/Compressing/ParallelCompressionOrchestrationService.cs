@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using TinyZipper.Application.Core;
 using TinyZipper.Application.Core.Interfaces;
 
 namespace TinyZipper.Application.Compressing
@@ -12,19 +13,22 @@ namespace TinyZipper.Application.Compressing
         private readonly ISourceReader _sourceReader;
         private readonly IDestinationWriter _destinationWriter;
         private readonly IOutcomeService _outcomeService;
+        private readonly IThreadService _threadService;
 
         public ParallelCompressionOrchestrationService(
             IClientOptionsService clientOptionsService,
             IParallelCompressionService parallelCompressionService,
             ISourceReader sourceReader,
             IDestinationWriter destinationWriter,
-            IOutcomeService outcomeService)
+            IOutcomeService outcomeService,
+            IThreadService threadService)
         {
             _clientOptionsService = clientOptionsService;
             _parallelCompressionService = parallelCompressionService;
             _sourceReader = sourceReader;
             _destinationWriter = destinationWriter;
             _outcomeService = outcomeService;
+            _threadService = threadService;
         }
 
         public bool Do(string[] args)
@@ -43,7 +47,7 @@ namespace TinyZipper.Application.Compressing
             var writeContext = _destinationWriter.Write(clientOptions.DestinationFileName, clientOptions.CompressionMode, 
                 parallelCompressionContext, calculationWorkFinishedSrc.Token);
 
-            WaitThreadsCompletion(parallelCompressionContext.Threads);
+            _threadService.WaitThreadsCompletion(parallelCompressionContext.Threads);
 
             calculationWorkFinishedSrc.Cancel();
 
@@ -51,12 +55,5 @@ namespace TinyZipper.Application.Compressing
 
             return _outcomeService.Finalize(startedTime, clientOptions, readContext, parallelCompressionContext, writeContext);
         }
-
-        private void WaitThreadsCompletion(IEnumerable<Thread> threads)
-        {
-            foreach (var thread in threads)
-                thread.Join();
-        }
-
     }
 }

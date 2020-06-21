@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Threading;
 using TinyZipper.Application.Core;
 using TinyZipper.Application.Core.Interfaces;
@@ -10,23 +8,26 @@ using TinyZipper.Application.Settings;
 
 namespace TinyZipper.Application.Readers
 {
-    public class FileToQueueReader : ISourceReader
+    public class StreamToQueueReader : ISourceReader
     {
-        private readonly IDataFormatService _dataFormatService;
+        private readonly IStreamUtilsService _streamUtilsService;
         private readonly IStatusUpdateService _statusUpdateService;
         private readonly ICompressionSettings _compressionSettings;
+        private readonly ISourceStreamService _sourceService;
 
-        public FileToQueueReader(
-            IDataFormatService dataFormatService, 
+        public StreamToQueueReader(
+            IStreamUtilsService streamUtilsService, 
             IStatusUpdateService statusUpdateService,
-            ICompressionSettings compressionSettings)
+            ICompressionSettings compressionSettings,
+            ISourceStreamService sourceService)
         {
-            _dataFormatService = dataFormatService;
+            _streamUtilsService = streamUtilsService;
             _statusUpdateService = statusUpdateService;
             _compressionSettings = compressionSettings;
+            _sourceService = sourceService;
         }
 
-        public AsyncReadContext<QueueItem> Read(string sourceUrl, CompressionMode compressionMode)
+        public AsyncReadContext<QueueItem> Read(string sourceUri, CompressionMode compressionMode)
         {
             IProducerConsumerCollection<QueueItem> queue = new ConcurrentQueue<QueueItem>();
             var sourceStreamClosedSrc = new CancellationTokenSource();
@@ -39,20 +40,20 @@ namespace TinyZipper.Application.Readers
                 try
                 {
                     int order = 0;
-                    using (var fileStream = new FileStream(sourceUrl, FileMode.Open, FileAccess.Read, FileShare.Read, _compressionSettings.ChunkSize, FileOptions.SequentialScan))
+                    using (var sourceStream = _sourceService.OpenRead(sourceUri))
                     {
                         while (true)
                         {
                             inputOverflowEvent.Wait();
 
-                            var chunkLength = GetChunkLength(fileStream, compressionMode);
+                            var chunkLength = _streamUtilsService.GetChunkLength(sourceStream, compressionMode, _compressionSettings.ChunkSize);
                             if (chunkLength == 0)
                             {
                                 sourceStreamClosedSrc.Cancel();
                                 return;
                             }
 
-                            var chunk = GetNextChunk(fileStream, chunkLength);
+                            var chunk = _streamUtilsService.GetNextChunk(sourceStream, chunkLength);
                             if (chunk.Length == 0)
                             {
                                 sourceStreamClosedSrc.Cancel();
@@ -77,34 +78,6 @@ namespace TinyZipper.Application.Readers
 
             return new AsyncReadContext<QueueItem>(queue, readerThread, sourceStreamClosedSrc, exceptionSrc, 
                 emptyInputEvent, inputOverflowEvent);
-        }
-        
-        private int GetChunkLength(Stream stream, CompressionMode compressionMode)
-        {
-            if (compressionMode == CompressionMode.Compress)
-                return _compressionSettings.ChunkSize;
-
-            var chunkMetaBytesBuffer = new byte[4];
-            var bytesRead = stream.Read(chunkMetaBytesBuffer, 0, chunkMetaBytesBuffer.Length);
-
-            if (bytesRead == 0)
-                return 0;
-
-            return _dataFormatService.GetChunkLength(chunkMetaBytesBuffer);
-        }
-
-        private byte[] GetNextChunk(Stream stream, int chunkLength)
-        {
-            var buffer = new byte[chunkLength];
-            var bytesRead = stream.Read(buffer, 0, buffer.Length);
-
-            if (bytesRead == 0)
-                return new byte[0];
-
-            if (bytesRead < buffer.Length)
-                buffer = buffer.Take(bytesRead).ToArray();
-
-            return buffer;
         }
     }
 }
