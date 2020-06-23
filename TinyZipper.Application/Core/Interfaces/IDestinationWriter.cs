@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Threading;
 using TinyZipper.Application.Compressing;
 

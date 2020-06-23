@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO.Compression;
-using TinyZipper.Application.ClientOptions;
 using TinyZipper.Application.Core;
+using TinyZipper.Application.Core.ClientOptions;
 using TinyZipper.Application.Core.Interfaces;
 
 namespace TinyZipper.Application.Compressing
 {
     public interface IOutcomeService
     {
-        bool Finalize(in DateTime startedTime, ClientOptionsModel clientOptions, AsyncReadContext<QueueItem> readContext, ParallelCompressionContext compressionContext, AsyncWriteContext writeContext);
+        void CompletedSuccessfully(ClientOptionsModel clientOptions, DateTime startedTime);
+
+        void Failed(ClientOptionsModel clientOptions);
     }
 
     public class OutcomeService : IOutcomeService
@@ -24,22 +26,7 @@ namespace TinyZipper.Application.Compressing
             _fileService = fileService;
         }
 
-        public bool Finalize(in DateTime startedTime, ClientOptionsModel clientOptions, AsyncReadContext<QueueItem> readContext,
-            ParallelCompressionContext compressionContext, AsyncWriteContext writeContext)
-        {
-            var isErrorOccured = readContext.ExceptionSource.IsCancellationRequested ||
-                                 compressionContext.ExceptionSource.IsCancellationRequested ||
-                                 writeContext.ExceptionSource.IsCancellationRequested;
-
-            if (isErrorOccured)
-                TidyUp(clientOptions);
-            else
-                SendCompletionMessage(clientOptions, startedTime);
-
-            return !isErrorOccured;
-        }
-
-        private void SendCompletionMessage(ClientOptionsModel clientOptions, DateTime startedTime)
+        public void CompletedSuccessfully(ClientOptionsModel clientOptions, DateTime startedTime)
         {
             var elapsed = (DateTime.Now - startedTime).TotalMilliseconds;
 
@@ -62,7 +49,7 @@ namespace TinyZipper.Application.Compressing
             _statusUpdateService.Info(message);
         }
 
-        private void TidyUp(ClientOptionsModel clientOptions)
+        public void Failed(ClientOptionsModel clientOptions)
         {
             _fileService.DeleteIfExistsSafe(clientOptions.DestinationFileName);
         }

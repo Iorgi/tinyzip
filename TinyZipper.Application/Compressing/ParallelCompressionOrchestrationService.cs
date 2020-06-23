@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using TinyZipper.Application.Core;
+using TinyZipper.Application.Core.ClientOptions;
 using TinyZipper.Application.Core.Interfaces;
 
 namespace TinyZipper.Application.Compressing
@@ -53,7 +53,14 @@ namespace TinyZipper.Application.Compressing
 
             writeContext.ProcessingThread.Join();
 
-            return _outcomeService.Finalize(startedTime, clientOptions, readContext, parallelCompressionContext, writeContext);
+            var failed = readContext.ExceptionSource.IsCancellationRequested ||
+                                 parallelCompressionContext.ExceptionSource.IsCancellationRequested ||
+                                 writeContext.ExceptionSource.IsCancellationRequested;
+
+            if (failed) _outcomeService.Failed(clientOptions);
+            else _outcomeService.CompletedSuccessfully(clientOptions, startedTime);
+
+            return !failed;
         }
     }
 }

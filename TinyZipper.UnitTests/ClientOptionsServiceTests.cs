@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO.Compression;
 using FluentAssertions;
-using TinyZipper.Application.ClientOptions;
-using TinyZipper.Application.Core.Interfaces;
+using TinyZipper.Application.Core.ClientOptions;
 using Xunit;
 
 namespace TinyZipper.UnitTests

@@ -1,6 +1,4 @@
-﻿using TinyZipper.Application.ClientOptions;
-
-namespace TinyZipper.Application.Core.Interfaces
+﻿namespace TinyZipper.Application.Core.ClientOptions
 {
     public interface IClientOptionsService
     {

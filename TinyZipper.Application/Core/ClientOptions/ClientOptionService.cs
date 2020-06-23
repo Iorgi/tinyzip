@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO.Compression;
-using TinyZipper.Application.Core.Interfaces;
 
-namespace TinyZipper.Application.ClientOptions
+namespace TinyZipper.Application.Core.ClientOptions
 {
     public class ClientOptionsService : IClientOptionsService
     {

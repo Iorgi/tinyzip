@@ -1,6 +1,6 @@
 ﻿using System.IO.Compression;
 
-namespace TinyZipper.Application.ClientOptions
+namespace TinyZipper.Application.Core.ClientOptions
 {
     public class ClientOptionsModel
     {

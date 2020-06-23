@@ -1,7 +1,7 @@
 ﻿using System;
 using TinyZipper.Application.Core.Interfaces;
 
-namespace TinyZipper.Application.StatusUpdaters
+namespace TinyZipper.Application.Core.StatusUpdaters
 {
     public class ConsoleStatusUpdateService : IStatusUpdateService
     {
