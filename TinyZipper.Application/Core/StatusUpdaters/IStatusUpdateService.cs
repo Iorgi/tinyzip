@@ -1,4 +1,4 @@
-﻿namespace TinyZipper.Application.Core.Interfaces
+﻿namespace TinyZipper.Application.Core.StatusUpdaters
 {
     public interface IStatusUpdateService
     {

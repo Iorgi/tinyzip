@@ -1,5 +1,4 @@
 ﻿using System;
-using TinyZipper.Application.Core.Interfaces;
 
 namespace TinyZipper.Application.Core.StatusUpdaters
 {

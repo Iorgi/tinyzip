@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using TinyZipper.Application.Core.Interfaces;
+using TinyZipper.Application.Core.StatusUpdaters;
 
 namespace TinyZipper.Application
 {

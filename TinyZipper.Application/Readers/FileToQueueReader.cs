@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Threading;
 using TinyZipper.Application.Core;
 using TinyZipper.Application.Core.Interfaces;
+using TinyZipper.Application.Core.StatusUpdaters;
 using TinyZipper.Application.Settings;
 
 namespace TinyZipper.Application.Readers

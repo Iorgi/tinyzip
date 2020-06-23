@@ -5,6 +5,7 @@ using FluentAssertions;
 using Moq;
 using TinyZipper.Application.Core;
 using TinyZipper.Application.Core.Interfaces;
+using TinyZipper.Application.Core.StatusUpdaters;
 using TinyZipper.Application.Readers;
 using Xunit;
 

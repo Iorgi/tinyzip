@@ -2,7 +2,7 @@
 using System.IO.Compression;
 using TinyZipper.Application.Core;
 using TinyZipper.Application.Core.ClientOptions;
-using TinyZipper.Application.Core.Interfaces;
+using TinyZipper.Application.Core.StatusUpdaters;
 
 namespace TinyZipper.Application.Compressing
 {

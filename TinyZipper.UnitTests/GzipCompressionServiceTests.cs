@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using FluentAssertions;
 using TinyZipper.Application.Compressing;
 using Xunit;
