@@ -32,9 +32,9 @@ Directory for the destination file should be created manually.
 
 Now tool implements file to file compression and decompression.
 But you can easily change it just implementing `ISourceStreamService` for source data and `IDestinationStreamService` for resulting data.
-These service are about working with `Stream`. But if you want read and write dtat using something else instead of `Stream` you can implement `ISourceReader` and 'IDestinationWriter'.
-Current implementation of `ISourceReader` reads stream to end and signals about it to complete process, but you can write own implementation to read forever.
+These service are about working with `Stream`. But if you want read and write data using something else instead of `Stream` you can implement `ISourceReader` and 'IDestinationWriter'.
+Current implementation of `ISourceReader` reads stream to end and signals about it to complete process, but you can write your own implementation to read forever.
 So there might be a lot of options what to read and where to write (for example, read form web end point, compress and save to cloud storage).
-Also there is ability to override how to interact with caller. Currently tinizyp just writes messages to Console, but you can write your own implementation of `IStatusUpdateService` to send some web requests.
+Also there is ability to override how to interact with caller. Currently tinizyp just writes messages to Console, but you can write your own implementation of `IStatusUpdateService` to send some web requests to keep client updated about the process.
 Also you can change compression algorithm just implementing `ICompressionService`.
-If you want change entire logic, implenment `ICompressionOrchestrationService`, whic now has two implementations: `SimpleCompressionOrchestrationService` (tinyzip (Simple)) and `ParallelCompressionOrchestrationService` (tinyzip (Parallel)).
+If you want to change the entire logic, implenment `ICompressionOrchestrationService`, which now has two implementations: `SimpleCompressionOrchestrationService` (tinyzip (Simple)) and `ParallelCompressionOrchestrationService` (tinyzip (Parallel)).
